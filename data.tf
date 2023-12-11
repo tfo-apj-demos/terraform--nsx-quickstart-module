@@ -9,3 +9,7 @@ data "nsxt_policy_edge_cluster" "this" {
 data "nsxt_policy_tier0_gateway" "this" {
   display_name = lookup(var.nsx_data[var.environment],"tier0_name")
 }
+
+data "nsxt_policy_dhcp_server" "this" {
+  display_name = "base-network-dhcp"
+}

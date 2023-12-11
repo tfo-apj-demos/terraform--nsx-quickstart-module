@@ -31,13 +31,19 @@ variable private_subnet_suffix {
 variable public_subnets {
   description = "A list of public subnets to use"
   type        = list(string)
-  default     = []
+  default     = ["172.21.201.0/24","172.21.202.0/24","172.21.203.0/24"]
 }
 
 variable private_subnets {
   description = "A list of private subnets to use"
   type        = list(string)
-  default     = []
+  default     = ["172.21.211.0/24","172.21.212.0/24","172.21.213.0/24"]
+}
+
+variable snat_subnets {
+  description = "A list of SNAT subnets to use"
+  type        = list(string)
+  default     = ["172.21.200.1/32","172.21.200.2/32","172.21.200.3/32"]
 }
 
 variable connectivity {

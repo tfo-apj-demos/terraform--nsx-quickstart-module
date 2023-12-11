@@ -24,6 +24,7 @@ resource nsxt_policy_segment "public" {
       "/",
       split("/", element(var.public_subnets, count.index))[1]
     )
+    dhcp_ranges = [format("%s-%s", cidrhost(element(var.public_subnets, count.index), 3),cidrhost(element(var.public_subnets, count.index), -3))]
   }
   advanced_config {
     connectivity = "ON"
@@ -42,6 +43,7 @@ resource nsxt_policy_segment "private" {
       "/",
       split("/", element(var.private_subnets, count.index))[1]
     )
+    dhcp_ranges = [format("%s-%s", cidrhost(element(var.private_subnets, count.index), 3),cidrhost(element(var.private_subnets, count.index), -3))]
   }
   advanced_config {
     connectivity = "ON"
@@ -56,6 +58,7 @@ resource nsxt_policy_tier1_gateway "this" {
   default_rule_logging      = "false"
   enable_firewall           = "false"
   enable_standby_relocation = "false"
+  dhcp_config_path          = data.nsxt_policy_dhcp_server.this.path
   tier0_path                = data.nsxt_policy_tier0_gateway.this.path
   pool_allocation           = "ROUTING"
 
@@ -64,7 +67,7 @@ resource nsxt_policy_tier1_gateway "this" {
     action                    = "PERMIT"
     subnets                   = var.public_subnets
     prefix_operator           = "EQ"
-    route_advertisement_types = ["TIER1_CONNECTED"]
+    route_advertisement_types = ["TIER1_CONNECTED", "TIER1_NAT","TIER1_LB_SNAT","TIER1_LB_VIP"]
   }
 }
 
@@ -72,7 +75,7 @@ resource nsxt_policy_nat_rule "private" {
   count               = length(var.private_subnets)
   display_name        = "${local.prefix}-${var.private_subnet_suffix}-snat-${count.index}"
   action              = "SNAT"
-  translated_networks = [var.private_subnets[count.index]]
+  translated_networks = [var.snat_subnets[count.index]]
   enabled             = var.private_subnets_snat_enabled
   gateway_path        = nsxt_policy_tier1_gateway.this.path
 }
